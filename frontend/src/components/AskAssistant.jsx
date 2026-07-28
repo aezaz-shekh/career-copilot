@@ -1,6 +1,7 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { api, streamAsk } from '../api.js'
-import { MicPermissionError, WavRecorder } from '../lib/recorder.js'
+import { MicPermissionError } from '../lib/recorder.js'
+import { createListener, selectProviders } from '../lib/speech.js'
 import { Alert, Card } from './ui.jsx'
 
 function MicIcon() {
@@ -207,7 +208,8 @@ export default function AskAssistant({ hero = false, greeting = '', belowWelcome
   const [transcribing, setTranscribing] = useState(false)
   const [answering, setAnswering] = useState(false)
   const [error, setError] = useState(null)
-  const [sttAvailable, setSttAvailable] = useState(false)
+  // Which tier can listen here: 'server' (whisper.cpp), 'browser', or null.
+  const [sttProvider, setSttProvider] = useState(null)
   // Whether chat is answered on this machine or by a hosted provider, so the
   // captions below state what is actually true for this deployment.
   const [isHosted, setIsHosted] = useState(false)
@@ -226,8 +228,10 @@ export default function AskAssistant({ hero = false, greeting = '', belowWelcome
   useEffect(() => {
     api
       .voiceStatus()
-      .then((v) => setSttAvailable(Boolean(v?.stt_available)))
-      .catch(() => setSttAvailable(false))
+      .then((v) => setSttProvider(selectProviders(v).stt))
+      // The probe failing does not mean speech is impossible — the browser may
+      // still be able to listen, so fall back to whatever it supports.
+      .catch(() => setSttProvider(selectProviders(null).stt))
     api
       .health()
       .then((h) => setIsHosted(h?.inference_mode === 'hosted'))
@@ -270,10 +274,11 @@ export default function AskAssistant({ hero = false, greeting = '', belowWelcome
 
   async function startRecording() {
     setError(null)
-    const recorder = new WavRecorder()
+    const listener = createListener(sttProvider)
+    if (!listener) return
     try {
-      await recorder.start()
-      recorderRef.current = recorder
+      await listener.start()
+      recorderRef.current = listener
       setRecording(true)
     } catch (err) {
       setError(
@@ -289,10 +294,8 @@ export default function AskAssistant({ hero = false, greeting = '', belowWelcome
     setRecording(false)
     setTranscribing(true)
     try {
-      const wav = await recorderRef.current.stop()
+      const text = await recorderRef.current.stop()
       recorderRef.current = null
-      const result = await api.transcribe(wav)
-      const text = (result.transcript || '').trim()
       if (text) {
         setQuestion((prev) => (prev.trim() ? `${prev.trim()} ${text}` : text))
       } else {
@@ -496,7 +499,7 @@ export default function AskAssistant({ hero = false, greeting = '', belowWelcome
           }}
         />
 
-        {sttAvailable && (
+        {sttProvider && (
           <button
             type="button"
             onClick={recording ? stopRecording : startRecording}

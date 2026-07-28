@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { api } from '../api.js'
+import { speakOnce } from '../lib/speech.js'
 
 /**
  * First-run welcome. The user enters their name, then the local Piper TTS voice
@@ -18,15 +18,11 @@ export default function WelcomeModal({ onDone }) {
     setGreeting(true)
     setSpeaking(true)
     try {
-      const url = await api.speak(`Hello ${clean}, welcome to AI Career Co-Pilot`)
-      const audio = new Audio(url)
-      audio.onended = () => {
-        URL.revokeObjectURL(url)
-        setSpeaking(false)
-      }
-      await audio.play().catch(() => setSpeaking(false))
+      // Piper when the host runs it, the browser's voice otherwise.
+      await speakOnce(`Hello ${clean}, welcome to AI Career Co-Pilot`)
+      setSpeaking(false)
     } catch {
-      // Voice not configured — greet silently.
+      // No voice available — greet silently.
       setSpeaking(false)
     }
   }

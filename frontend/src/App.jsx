@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { api } from './api.js'
+import { speakOnce } from './lib/speech.js'
 import ToastHost from './components/ToastHost.jsx'
 import WelcomeModal from './components/WelcomeModal.jsx'
 import DashboardPage from './pages/DashboardPage.jsx'
@@ -160,14 +161,9 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   async function speakGreeting(who) {
-    try {
-      const url = await api.speak(`Hello ${who}, welcome to AI Career Co-Pilot`)
-      const audio = new Audio(url)
-      audio.onended = () => URL.revokeObjectURL(url)
-      audio.play().catch(() => {})
-    } catch {
-      /* voice not configured — stay silent */
-    }
+    // Piper when the host runs it, the browser's voice otherwise, silence if
+    // neither — greeting the user must never surface an error.
+    await speakOnce(`Hello ${who}, welcome to AI Career Co-Pilot`)
   }
 
   const checkHealth = useCallback(async () => {

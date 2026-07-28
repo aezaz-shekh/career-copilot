@@ -1,6 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
-import { ApiError, api } from '../api.js'
-import { MicPermissionError, WavRecorder } from '../lib/recorder.js'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import {
+  ApiError,
+  MicPermissionError,
+  createListener,
+  createSpeaker,
+  describeProvider,
+  selectProviders,
+} from '../lib/speech.js'
 import { Alert, Button } from './ui.jsx'
 
 /**
@@ -12,6 +18,10 @@ import { Alert, Button } from './ui.jsx'
  * There is no separate "submit" step: tapping Done transcribes and submits. The
  * acknowledgment is deliberately neutral/warm (never "perfect") — scores stay
  * hidden until the end, like a real interview.
+ *
+ * Speech itself is delegated to lib/speech.js, which picks whisper.cpp + Piper
+ * when the host can run them and the browser's own speech services otherwise.
+ * The flow below is identical either way — it never learns which tier answered.
  */
 const ACKS = [
   'Thank you.',
@@ -21,34 +31,22 @@ const ACKS = [
   'Understood, thank you.',
 ]
 
-export default function VoiceAnswer({ question, ttsAvailable, busy, onSubmit }) {
+export default function VoiceAnswer({ question, voiceStatus, busy, onSubmit }) {
   // phase: 'speaking' (question) | 'ready' | 'recording' | 'transcribing'
   const [phase, setPhase] = useState('ready')
   const [transcript, setTranscript] = useState('')
   const [error, setError] = useState(null)
-  const recorderRef = useRef(null)
+  const listenerRef = useRef(null)
   const audioRef = useRef(null)
   const urlRef = useRef(null)
 
-  // Speak text aloud (local TTS) and resolve when it finishes. Best-effort:
-  // if autoplay is blocked or voice is off, it resolves silently.
-  async function speak(text) {
-    if (!ttsAvailable) return
-    try {
-      const url = await api.speak(text)
-      if (urlRef.current) URL.revokeObjectURL(urlRef.current)
-      urlRef.current = url
-      const audio = audioRef.current
-      if (!audio) return
-      audio.src = url
-      await audio.play()
-      await new Promise((resolve) => {
-        audio.onended = resolve
-      })
-    } catch {
-      /* autoplay blocked or voice unavailable — continue silently */
-    }
-  }
+  const providers = useMemo(() => selectProviders(voiceStatus), [voiceStatus])
+  const speak = useMemo(
+    () => createSpeaker(providers.tts, { audioEl: audioRef.current, urlRef }),
+    [providers.tts],
+  )
+  const canSpeak = providers.tts !== null
+  const providerLabel = describeProvider(providers)
 
   // A new question arrives → speak it, then wait for the user to record.
   useEffect(() => {
@@ -66,8 +64,11 @@ export default function VoiceAnswer({ question, ttsAvailable, busy, onSubmit }) 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [question])
 
+  // Stop any in-flight recognition and release the last audio URL on unmount,
+  // so leaving mid-answer never leaves the microphone live.
   useEffect(
     () => () => {
+      listenerRef.current?.abort()
       if (urlRef.current) URL.revokeObjectURL(urlRef.current)
     },
     [],
@@ -75,10 +76,17 @@ export default function VoiceAnswer({ question, ttsAvailable, busy, onSubmit }) 
 
   async function startRecording() {
     setError(null)
-    const recorder = new WavRecorder()
+    const listener = createListener(providers.stt)
+    if (!listener) {
+      setError({
+        message: 'Speech input is not available here.',
+        hint: 'Switch to Text mode above to type your answer instead.',
+      })
+      return
+    }
     try {
-      await recorder.start()
-      recorderRef.current = recorder
+      await listener.start()
+      listenerRef.current = listener
       setPhase('recording')
     } catch (err) {
       setError(
@@ -91,13 +99,11 @@ export default function VoiceAnswer({ question, ttsAvailable, busy, onSubmit }) 
   }
 
   async function stopAndSubmit() {
-    if (!recorderRef.current) return
+    if (!listenerRef.current) return
     setPhase('transcribing')
     try {
-      const wav = await recorderRef.current.stop()
-      recorderRef.current = null
-      const result = await api.transcribe(wav)
-      const text = (result.transcript || '').trim()
+      const text = await listenerRef.current.stop()
+      listenerRef.current = null
       setTranscript(text)
       if (!text) {
         setError({ message: 'Nothing was transcribed.', hint: 'Tap record and speak a bit louder.' })
@@ -109,10 +115,13 @@ export default function VoiceAnswer({ question, ttsAvailable, busy, onSubmit }) 
       await speak(ACKS[Math.floor(Math.random() * ACKS.length)])
       onSubmit(text)
     } catch (err) {
+      listenerRef.current = null
       setError(
         err instanceof ApiError
           ? { message: err.message, hint: err.hint }
-          : { message: 'Transcription failed.', hint: null },
+          : err instanceof MicPermissionError
+            ? { message: err.message, hint: 'Switch to Text mode above to type instead.' }
+            : { message: 'Transcription failed.', hint: null },
       )
       setPhase('ready')
     }
@@ -134,7 +143,7 @@ export default function VoiceAnswer({ question, ttsAvailable, busy, onSubmit }) 
             <Button onClick={startRecording} disabled={busy}>
               🎤 Record your answer
             </Button>
-            {ttsAvailable && (
+            {canSpeak && (
               <button
                 type="button"
                 onClick={() => speak(question)}
@@ -161,9 +170,11 @@ export default function VoiceAnswer({ question, ttsAvailable, busy, onSubmit }) 
         {phase === 'transcribing' && <p className="text-sm text-slate-500">Hearing your answer…</p>}
 
         {busy && phase !== 'recording' && (
-          <p className="text-xs text-slate-400">
-            Scoring locally… the next question comes up on its own.
-          </p>
+          <p className="text-xs text-slate-400">Scoring… the next question comes up on its own.</p>
+        )}
+
+        {providerLabel && phase === 'ready' && (
+          <p className="text-[11px] text-slate-400">{providerLabel}</p>
         )}
       </div>
 

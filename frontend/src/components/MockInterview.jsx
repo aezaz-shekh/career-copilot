@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { ApiError, api } from '../api.js'
 import { Alert, Button } from './ui.jsx'
+import { selectProviders } from '../lib/speech.js'
 import VoiceAnswer from './VoiceAnswer.jsx'
 
 /**
@@ -43,7 +44,10 @@ export default function MockInterview({
   const [mode, setMode] = useState('text') // 'text' | 'voice'
   const bottomRef = useRef(null)
 
-  const voiceOffered = Boolean(voiceStatus?.stt_available)
+  // Voice is offered when *either* tier can listen: whisper.cpp on a host that
+  // can run it, or the browser's own recognition otherwise. Without this the
+  // mode would be hidden on any deployment too small for the binaries.
+  const voiceOffered = selectProviders(voiceStatus).stt !== null
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -194,7 +198,7 @@ export default function MockInterview({
           {mode === 'voice' && voiceOffered ? (
             <VoiceAnswer
               question={current.question}
-              ttsAvailable={Boolean(voiceStatus?.tts_available)}
+              voiceStatus={voiceStatus}
               busy={busy}
               onSubmit={(text) => submit(text)}
             />
