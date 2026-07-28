@@ -255,10 +255,14 @@ function createServerListener() {
   }
 }
 
-async function serverSpeak(text, audioEl, urlRef) {
+async function serverSpeak(text, audioRef, urlRef) {
   const url = await api.speak(text)
   if (urlRef.current) URL.revokeObjectURL(urlRef.current)
   urlRef.current = url
+  // Read the element at call time, not when the speaker was built: refs are
+  // still null on the first render, so capturing .current up front silently
+  // skipped the very first spoken question.
+  const audioEl = audioRef?.current
   if (!audioEl) return
   audioEl.src = url
   await audioEl.play()
@@ -299,11 +303,11 @@ export function createListener(sttProvider) {
  * Speech is decorative: a blocked autoplay or a missing voice must never stop
  * an interview, so every failure resolves quietly rather than rejecting.
  */
-export function createSpeaker(ttsProvider, { audioEl, urlRef } = {}) {
+export function createSpeaker(ttsProvider, { audioRef, urlRef } = {}) {
   if (ttsProvider === 'server') {
     return async (text) => {
       try {
-        await serverSpeak(text, audioEl, urlRef)
+        await serverSpeak(text, audioRef, urlRef)
       } catch {
         /* autoplay blocked or voice unavailable — continue silently */
       }

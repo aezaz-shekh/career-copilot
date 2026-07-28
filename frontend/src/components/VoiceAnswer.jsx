@@ -42,7 +42,7 @@ export default function VoiceAnswer({ question, voiceStatus, busy, onSubmit }) {
 
   const providers = useMemo(() => selectProviders(voiceStatus), [voiceStatus])
   const speak = useMemo(
-    () => createSpeaker(providers.tts, { audioEl: audioRef.current, urlRef }),
+    () => createSpeaker(providers.tts, { audioRef, urlRef }),
     [providers.tts],
   )
   const canSpeak = providers.tts !== null

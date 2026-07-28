@@ -20,6 +20,11 @@ services:
     dockerContext: .
     plan: free
     healthCheckPath: /health
+    branch: main
+    # Explicit so a push always ships. Without it the service can sit on the
+    # build it was created with while the repository moves on, which looks
+    # exactly like the fixes not working.
+    autoDeploy: true
     envVars:
       - key: VOICE_ENABLED
         value: "false"
