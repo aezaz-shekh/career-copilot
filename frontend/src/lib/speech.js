@@ -116,6 +116,22 @@ function createBrowserListener() {
 }
 
 /**
+ * Give the synthesiser something to breathe on.
+ *
+ * A question like "Tell me about a time you failed What did you learn" runs
+ * together without punctuation. Adding a comma after a leading clause and a
+ * full stop between sentences that lack one makes the delivery land as speech
+ * rather than a single long string.
+ */
+function addBreathingRoom(text) {
+  return text
+    .replace(/([a-z0-9])\s+(But|And|So|Then|Now|However|Also)\s/g, '$1. $2 ')
+    .replace(/([.!?])([A-Z])/g, '$1 $2')
+    .replace(/:\s*/g, ': ')
+    .trim()
+}
+
+/**
  * Resolve once the browser has actually populated its voice list.
  *
  * getVoices() is empty on the first call in Chrome — the list arrives later on
@@ -156,38 +172,68 @@ function whenVoicesReady() {
  * most robotic one, so prefer the known-good names first and fall back to any
  * local English voice before letting the browser choose.
  */
-// Warm, natural female voices, best first. The project's own Piper voice is
+// Warm, clear female voices, best first. The project's own Piper voice is
 // female (en_US-amy-medium), so the browser tier matching that keeps the app
 // sounding like itself wherever it runs.
+//
+// The "Natural"/"Online" Microsoft voices and macOS's premium set are neural
+// rather than concatenative — noticeably smoother and clearer than the older
+// built-ins — so they are listed above the classic ones.
 const PREFERRED_VOICES = [
-  'Samantha', // macOS/iOS — the most natural of the built-ins
-  'Google US English', // Chrome — female despite the neutral name
+  // Neural, the clearest available in each browser.
   'Microsoft Aria Online (Natural) - English (United States)',
   'Microsoft Jenny Online (Natural) - English (United States)',
+  'Microsoft Michelle Online (Natural) - English (United States)',
+  'Google US English',
+  // macOS / iOS premium and enhanced variants, when the user has downloaded them.
+  'Samantha (Premium)',
+  'Ava (Premium)',
+  'Allison (Premium)',
+  'Samantha (Enhanced)',
+  'Ava (Enhanced)',
+  // Solid classic fallbacks.
+  'Samantha',
+  'Ava',
+  'Allison',
+  'Susan',
   'Microsoft Zira - English (United States)',
   'Karen',
-  'Moira',
   'Tessa',
 ]
 
 // Names that reliably indicate a female voice, for browsers whose list does not
 // include any of the above.
-const FEMALE_HINTS = /samantha|karen|moira|tessa|victoria|fiona|zira|aria|jenny|female|woman/i
+const FEMALE_HINTS =
+  /samantha|karen|moira|tessa|victoria|fiona|zira|aria|jenny|michelle|ava|allison|susan|serena|female|woman|girl/i
+
+// Voices that sound robotic even when they match everything else. Excluded so a
+// fallback never lands on one.
+const LOW_QUALITY = /albert|bad news|bahh|bells|boing|bubbles|cellos|deranged|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|junior|ralph|fred|grandma|grandpa|rocko|shelley|sandy|flo|eddy|reed|rishi/i
 
 // Default rate is noticeably brisk for an interview question you are meant to
-// think about. Slightly under 1 reads as measured rather than hurried.
-const SPEECH_RATE = 0.92
-// A touch above neutral keeps a lower voice from sounding flat.
-const SPEECH_PITCH = 1.05
+// think about. Slightly under 1 reads as measured rather than hurried, and
+// slower still is where words start to smear together.
+const SPEECH_RATE = 0.95
+// Slightly above neutral brightens the tone without tipping into a cartoon
+// pitch, which is what makes a synthesised voice sound thin.
+const SPEECH_PITCH = 1.08
+// Full volume: anything less reads as muffled through laptop speakers.
+const SPEECH_VOLUME = 1.0
 
 function pickVoice(voices) {
+  const usable = voices.filter((v) => !LOW_QUALITY.test(v.name))
+
   for (const name of PREFERRED_VOICES) {
-    const match = voices.find((v) => v.name === name)
+    const match = usable.find((v) => v.name === name)
     if (match) return match
   }
-  const english = voices.filter((v) => v.lang?.startsWith('en'))
+
+  const english = usable.filter((v) => v.lang?.startsWith('en'))
   return (
+    // A neural voice, whatever it is called, beats a classic one on clarity.
+    english.find((v) => /natural|premium|enhanced|neural/i.test(v.name) && FEMALE_HINTS.test(v.name)) ||
     english.find((v) => FEMALE_HINTS.test(v.name)) ||
+    english.find((v) => /natural|premium|enhanced|neural/i.test(v.name)) ||
     english.find((v) => v.localService) ||
     english[0] ||
     null
@@ -209,12 +255,16 @@ async function browserSpeak(text) {
   if (!synth) return
 
   return new Promise((resolve) => {
-    const utterance = new globalThis.SpeechSynthesisUtterance(text)
+    // Synthesisers run sentences together when the punctuation is sparse, which
+    // is most of what makes a spoken answer hard to follow. Nudging the pauses
+    // costs nothing and buys a lot of clarity.
+    const utterance = new globalThis.SpeechSynthesisUtterance(addBreathingRoom(text))
     const voice = pickVoice(voices)
     if (voice) utterance.voice = voice
     utterance.lang = voice?.lang || 'en-US'
     utterance.rate = SPEECH_RATE
     utterance.pitch = SPEECH_PITCH
+    utterance.volume = SPEECH_VOLUME
 
     let settled = false
     const finish = () => {

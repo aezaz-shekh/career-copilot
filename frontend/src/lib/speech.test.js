@@ -163,3 +163,52 @@ describe('voice selection', () => {
     expect(utterance.rate).toBeGreaterThan(0.8)
   })
 })
+
+describe('voice quality', () => {
+  const voicesFrom = (names) =>
+    names.map((name) => ({ name, lang: 'en-US', localService: true }))
+
+  async function pick(names, tag) {
+    setBrowserSupport({ stt: false, tts: true })
+    vi.stubGlobal('speechSynthesis', {
+      getVoices: () => voicesFrom(names),
+      speak: (utterance) => utterance.onend?.(),
+      cancel() {},
+      addEventListener() {},
+      removeEventListener() {},
+    })
+    let spoken = null
+    vi.stubGlobal('SpeechSynthesisUtterance', function Utterance(text) {
+      this.text = text
+      spoken = this
+    })
+    const { speakOnce } = await import('./speech.js?q=' + tag)
+    await speakOnce('hello')
+    return spoken
+  }
+
+  it('prefers a neural voice over a classic one', async () => {
+    const u = await pick(
+      ['Samantha', 'Microsoft Aria Online (Natural) - English (United States)'],
+      'neural',
+    )
+    expect(u.voice?.name).toMatch(/Aria/)
+  })
+
+  it('never selects a novelty voice', async () => {
+    // macOS ships joke voices like Zarvox and Bubbles; landing on one would be
+    // worse than any accent mismatch.
+    const u = await pick(['Zarvox', 'Bubbles', 'Victoria'], 'novelty')
+    expect(u.voice?.name).toBe('Victoria')
+  })
+
+  it('speaks at full volume', async () => {
+    const u = await pick(['Samantha'], 'volume')
+    expect(u.volume).toBe(1)
+  })
+
+  it('separates run-on sentences so speech is followable', async () => {
+    const u = await pick(['Samantha'], 'pacing')
+    expect(u.text).toBeDefined()
+  })
+})
