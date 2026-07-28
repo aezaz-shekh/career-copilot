@@ -1,0 +1,48 @@
+{
+  "sender_resume": {
+    "title": "Aarav Sharma — Junior Developer",
+    "raw_text": "AARAV SHARMA\nPune | BCA 2025 | Python, Flask, React, SQL, Git. Built a Library Management System in Flask. Web Development Intern at Nexus Softwares. Targeting junior backend developer roles."
+  },
+  "scenarios": [
+    {
+      "name": "Cold intro to a senior engineer (LinkedIn)",
+      "purpose": "cold",
+      "platform": "linkedin_note",
+      "hook": "your blog post on structuring FastAPI projects",
+      "target_role": "Junior Python Developer",
+      "contact": {"name": "Meera Krishnan", "role": "Senior Backend Engineer", "company": "TechNova", "notes": "Writes a well-known blog on FastAPI project structure"}
+    },
+    {
+      "name": "Referral ask to a recruiter (Email)",
+      "purpose": "referral",
+      "platform": "email",
+      "hook": "the Junior Python Developer opening your team posted last week",
+      "target_role": "Junior Python Developer",
+      "contact": {"name": "Rahul Deshpande", "role": "Technical Recruiter", "company": "TechNova", "notes": "Posted a junior backend role on LinkedIn last week"}
+    },
+    {
+      "name": "Thank-you after an interview (Email)",
+      "purpose": "thankyou",
+      "platform": "email",
+      "hook": "our conversation about caching strategies in the interview",
+      "target_role": "Junior Python Developer",
+      "contact": {"name": "Anjali Rao", "role": "Engineering Manager", "company": "DataBridge", "notes": "Interviewed me; we discussed caching and REST design"}
+    },
+    {
+      "name": "Follow-up on an application (InMail)",
+      "purpose": "followup",
+      "platform": "inmail",
+      "hook": "my application for the backend intern role two weeks ago",
+      "target_role": "Backend Developer Intern",
+      "contact": {"name": "Vikram Nair", "role": "Hiring Manager", "company": "CloudServe", "notes": "I applied to their backend intern posting two weeks ago, no reply yet"}
+    },
+    {
+      "name": "Cold intro to a team lead after a meetup (InMail)",
+      "purpose": "cold",
+      "platform": "inmail",
+      "hook": "your talk on scaling Django at the Pune Python meetup",
+      "target_role": "Junior Python Developer",
+      "contact": {"name": "Sana Sheikh", "role": "Tech Lead", "company": "Innovate Labs", "notes": "Gave a talk on scaling Django at the Pune Python meetup I attended"}
+    }
+  ]
+}

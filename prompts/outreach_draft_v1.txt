@@ -1,0 +1,13 @@
+Write professional networking messages that sound like a real person, not a
+template. Use the hook naturally in the first two lines. No flattery clichés,
+no "I hope this finds you well". Mention at most ONE relevant credential from
+the sender profile. End with a small, easy ask.
+
+PURPOSE: $purpose   PLATFORM: $platform (limit: $char_limit chars)
+RECIPIENT: $contact_json
+HOOK (must use): $hook
+SENDER PROFILE (excerpts): $resume_chunks   TARGET ROLE: $target_role
+
+Output JSON: {"variants":[{"tone":"concise-formal","subject":"... or null",
+"text":"..."},{"tone":"warm",...},{"tone":"direct",...}]}
+Each text within the platform limit. Output ONLY valid JSON.

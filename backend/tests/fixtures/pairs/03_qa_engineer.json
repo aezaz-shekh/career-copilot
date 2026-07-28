@@ -1,0 +1,23 @@
+{
+  "role": "QA Engineer",
+  "resume": {
+    "title": "Rohan Verma — QA Engineer",
+    "raw_text": "ROHAN VERMA\nNoida, Uttar Pradesh | rohan.verma@email.com | +91 99887 76655\n\nOBJECTIVE\nIT graduate seeking a QA engineer role to ensure software quality through careful testing.\n\nEDUCATION\nB.Tech Information Technology, AKTU, 2021-2025, 7.6 CGPA\n\nEXPERIENCE\nQA Intern, BrightApps, Noida, Jan 2025 - Apr 2025\n- Wrote test cases for the mobile app\n- Reported bugs in the tracker\n- Did some testing on the login and payment screens\n\nPROJECTS\nE-commerce Test Suite — Selenium, Java\n- Automated login and checkout tests\n- Ran tests and noted the failures\n\nSKILLS\nManual Testing, Test Case Design, Selenium, Java, SQL, JIRA, API Testing, Postman\n\nCERTIFICATIONS\nISTQB Foundation (in progress)\n",
+    "parsed": {
+      "contact": {"name": "Rohan Verma", "email": "rohan.verma@email.com", "phone": "+91 99887 76655", "location": "Noida, Uttar Pradesh", "links": []},
+      "summary": "IT graduate seeking a QA engineer role to ensure software quality through careful testing.",
+      "experience": [
+        {"role": "QA Intern", "company": "BrightApps", "location": "Noida", "start_date": "Jan 2025", "end_date": "Apr 2025", "bullets": ["Wrote test cases for the mobile app", "Reported bugs in the tracker", "Did some testing on the login and payment screens"]}
+      ],
+      "education": [{"degree": "B.Tech Information Technology", "institution": "AKTU", "start_date": "2021", "end_date": "2025", "details": "7.6 CGPA"}],
+      "skills": ["Manual Testing", "Test Case Design", "Selenium", "Java", "SQL", "JIRA", "API Testing", "Postman"],
+      "projects": [{"name": "E-commerce Test Suite", "description": "Automated login and checkout tests", "bullets": ["Automated login and checkout tests", "Ran tests and noted the failures"], "technologies": ["Selenium", "Java"]}],
+      "certifications": ["ISTQB Foundation (in progress)"]
+    }
+  },
+  "jd": {
+    "title": "QA Engineer (Fresher)",
+    "company": "QualiTech Systems",
+    "raw_text": "QA Engineer (Fresher) — QualiTech Systems, Gurugram\n\nJoin our QA team to test web and mobile applications before release.\n\nResponsibilities:\n- Design and execute manual test cases\n- Log and track defects in JIRA\n- Perform API testing with Postman\n- Write SQL queries to validate data\n- Follow SDLC and STLC processes\n\nRequired skills: manual testing, test case design, defect tracking, JIRA, SQL, API testing, SDLC, STLC.\nNice to have: Selenium automation, Python, CI/CD, performance testing.\n\nEligibility: B.Tech / BCA / MCA freshers with an eye for detail."
+  }
+}

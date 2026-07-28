@@ -1,0 +1,44 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# --- Secrets & local overrides (there are no API keys, but never commit .env) ---
+.env
+
+# --- Runtime logs from run.bat / autostart.bat ---
+logs/
+
+# --- Local user data: resumes, interview transcripts, embeddings ---
+# This is personal data. It must never reach GitHub.
+data/
+*.db
+*.db-journal
+*.sqlite3
+uploads/
+audio_tmp/
+
+# --- Node / frontend ---
+node_modules/
+dist/
+.vite/
+
+# --- Local model binaries (downloaded by setup, far too large for Git) ---
+models/
+*.gguf
+*.onnx
+
+# --- Voice: whisper.cpp + Piper binaries and models (downloaded by setup) ---
+voice/
+*.bin
+*.onnx.json
+
+# --- Editors / OS ---
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini

@@ -1,0 +1,28 @@
+# AI Career Co-Pilot — backend dependencies
+# Every package here is free and open-source. No API keys, no paid services.
+# Python 3.12
+
+# --- Web framework ---
+fastapi>=0.115,<1.0
+uvicorn[standard]>=0.30,<1.0
+python-multipart>=0.0.9          # multipart/form-data (resume file upload, Phase 1)
+
+# --- Config & validation ---
+pydantic>=2.9,<3.0
+pydantic-settings>=2.5,<3.0
+
+# --- Local LLM transport (Ollama REST API) ---
+httpx>=0.27,<1.0
+
+# --- Database ---
+SQLAlchemy>=2.0,<3.0
+sqlite-vec>=0.1.6,<0.2           # vector similarity search inside SQLite
+
+# --- Resume parsing (Phase 1) ---
+PyMuPDF>=1.24,<2.0
+pdfplumber>=0.11,<1.0
+
+# --- Testing & code quality ---
+pytest>=8.0,<9.0
+pytest-asyncio>=0.24
+ruff>=0.6

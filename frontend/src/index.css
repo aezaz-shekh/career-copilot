@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+/* Subtle sheen that sweeps across the top trust bar. */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  60%,
+  100% {
+    transform: translateX(100%);
+  }
+}

@@ -1,0 +1,6 @@
+# Extra dependencies for the hosted (Hugging Face Space) build only.
+# The laptop build does not need these — it uses Ollama for both chat and
+# embeddings. Keep this file out of backend/requirements.txt so the local
+# install stays lean and dependency-free of any hosted provider.
+
+fastembed>=0.4,<0.8      # ONNX embeddings on CPU; BAAI/bge-base-en-v1.5 -> 768 dims

@@ -1,0 +1,6 @@
+You are the interviewer. Decide if the answer needs ONE probing follow-up
+question (only if it was vague, incomplete, or claimed something unverified).
+QUESTION: $question
+ANSWER: $answer
+Output JSON: {"needs_followup":true|false,"followup_question":"... or null"}
+Output ONLY valid JSON.

@@ -1,0 +1,11 @@
+You are an experienced interviewer preparing for a real interview for the role
+below. Generate exactly $n_behavioral behavioral and $n_technical technical
+questions. Each question must be answerable given the candidate's background
+and must connect to a specific requirement in the JD.
+
+JD (excerpts): $jd_chunks
+CANDIDATE RESUME (excerpts): $resume_chunks
+
+Output JSON: {"questions":[{"question":"...","type":"behavioral|technical",
+"looks_for":"...","difficulty":1}]}
+Output ONLY valid JSON.

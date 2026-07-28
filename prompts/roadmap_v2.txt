@@ -1,0 +1,18 @@
+Create a realistic learning roadmap from the skill gaps below for someone
+studying/working ~10 hrs/week toward the target role. Describe resources
+generically (a type of course / project / certification / practice) — never
+name a paid product or brand. Every action must map to one of the listed gap
+skills and name that skill.
+
+Phases (give 3-5 concrete actions each):
+- "now": start in the next 0-1 month
+- "short": the 1-3 month horizon
+- "long": the 3-12 month horizon
+
+TARGET ROLE: $target_role
+SKILL GAPS: $gaps_json
+
+Output JSON: {"phases":[{"name":"now","actions":[{"skill":"...","action":"...",
+"type":"course|project|cert|practice","why":"..."}]},{"name":"short","actions":
+[...]},{"name":"long","actions":[...]}]}
+Output ONLY valid JSON.

@@ -1,0 +1,37 @@
+[project]
+name = "career-copilot-backend"
+version = "0.1.0"
+description = "AI Career Co-Pilot — privacy-first, fully local career assistant"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+# E/F = pycodestyle + pyflakes, I = import sorting, UP = modern syntax,
+# B = likely bugs, SIM = simplifications.
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]  # asserts are the point of a test file
+
+[tool.ruff.lint.flake8-bugbear]
+# B008 forbids function calls in argument defaults, but that is exactly how
+# FastAPI declares dependencies and request parts. These calls are evaluated
+# once at import and are immutable, so the rule does not apply to them.
+extend-immutable-calls = [
+    "fastapi.Body",
+    "fastapi.Depends",
+    "fastapi.File",
+    "fastapi.Form",
+    "fastapi.Header",
+    "fastapi.Path",
+    "fastapi.Query",
+]

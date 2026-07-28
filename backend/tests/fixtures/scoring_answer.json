@@ -1,0 +1,6 @@
+{
+  "description": "One canned interview answer scored 3 times to measure consistency (SOW Section 12: repeats within +/-1 point per dimension).",
+  "question": "Tell me about a time you had to debug a difficult problem in a project.",
+  "jd_context": "Junior Python Developer at TechNova. Build REST APIs with Python and FastAPI, write SQL against PostgreSQL, collaborate on Git, write pytest unit tests.",
+  "answer": "In my Library Management System project, book returns were sometimes not updating the available count. I reproduced the issue by returning the same book twice quickly, then added logging and found a race condition in my Flask route where two requests read the count before either wrote it. I fixed it by wrapping the update in a single SQL transaction with a row lock, and added a pytest test that simulated two concurrent returns. After the fix the count stayed correct, and I learned to reach for database transactions instead of application-level checks."
+}

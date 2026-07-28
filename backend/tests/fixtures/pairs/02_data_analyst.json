@@ -1,0 +1,23 @@
+{
+  "role": "Data Analyst",
+  "resume": {
+    "title": "Priya Nair — Data Analyst",
+    "raw_text": "PRIYA NAIR\nKochi, Kerala | priya.nair@email.com | +91 90123 45678 | linkedin.com/in/priyanair\n\nOBJECTIVE\nStatistics graduate looking for a data analyst role to turn data into clear business decisions.\n\nEDUCATION\nB.Sc Statistics, Cochin University of Science and Technology, 2022-2025, 78%\n\nEXPERIENCE\nData Analyst Intern, Insight Analytics, Kochi, Jun 2024 - Aug 2024\n- Cleaned data in Excel for the monthly reports\n- Made some charts in Power BI\n- Helped the team with SQL queries\n\nPROJECTS\nRetail Sales Dashboard — Power BI, SQL\n- Built a dashboard to show sales by region\n- Used SQL to pull data from the database\n\nSKILLS\nExcel, SQL, Python, pandas, Power BI, Statistics, Data Visualization\n\nCERTIFICATIONS\nGoogle Data Analytics (Coursera)\n",
+    "parsed": {
+      "contact": {"name": "Priya Nair", "email": "priya.nair@email.com", "phone": "+91 90123 45678", "location": "Kochi, Kerala", "links": ["linkedin.com/in/priyanair"]},
+      "summary": "Statistics graduate looking for a data analyst role to turn data into clear business decisions.",
+      "experience": [
+        {"role": "Data Analyst Intern", "company": "Insight Analytics", "location": "Kochi", "start_date": "Jun 2024", "end_date": "Aug 2024", "bullets": ["Cleaned data in Excel for the monthly reports", "Made some charts in Power BI", "Helped the team with SQL queries"]}
+      ],
+      "education": [{"degree": "B.Sc Statistics", "institution": "Cochin University of Science and Technology", "start_date": "2022", "end_date": "2025", "details": "78%"}],
+      "skills": ["Excel", "SQL", "Python", "pandas", "Power BI", "Statistics", "Data Visualization"],
+      "projects": [{"name": "Retail Sales Dashboard", "description": "Dashboard showing sales by region", "bullets": ["Built a dashboard to show sales by region", "Used SQL to pull data from the database"], "technologies": ["Power BI", "SQL"]}],
+      "certifications": ["Google Data Analytics (Coursera)"]
+    }
+  },
+  "jd": {
+    "title": "Data Analyst",
+    "company": "DataBridge Technologies",
+    "raw_text": "Data Analyst — DataBridge Technologies, Hyderabad\n\nWe are looking for an entry-level Data Analyst to support reporting and insights for our clients.\n\nResponsibilities:\n- Write SQL queries to extract and aggregate data\n- Build dashboards in Power BI or Tableau\n- Analyze datasets using Python (pandas, numpy)\n- Present findings with clear data visualization\n\nRequired skills: SQL, Excel, Power BI or Tableau, Python, pandas, statistics, data visualization.\nNice to have: ETL, data warehousing, cloud (Azure or GCP), stakeholder communication.\n\nEligibility: B.Sc / B.Com / BCA freshers with strong analytical skills."
+  }
+}

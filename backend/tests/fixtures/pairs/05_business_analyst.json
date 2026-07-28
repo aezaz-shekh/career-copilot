@@ -1,0 +1,23 @@
+{
+  "role": "Business Analyst",
+  "resume": {
+    "title": "Karan Mehta — Business Analyst",
+    "raw_text": "KARAN MEHTA\nAhmedabad, Gujarat | karan.mehta@email.com | +91 93456 78901 | linkedin.com/in/karanmehta\n\nOBJECTIVE\nBBA graduate seeking a business analyst role to bridge business needs and technical teams.\n\nEDUCATION\nBachelor of Business Administration, Gujarat University, 2022-2025, 74%\n\nEXPERIENCE\nBusiness Analyst Intern, FinServe Consulting, Ahmedabad, May 2024 - Jul 2024\n- Talked to clients to understand their requirements\n- Made documents for the requirements\n- Helped with some Excel reports\n\nPROJECTS\nExpense Tracker Requirements Study — Excel, Figma\n- Gathered requirements for an expense app\n- Made simple wireframes for the screens\n\nSKILLS\nRequirement Gathering, Excel, SQL, Documentation, Wireframing, Communication, Agile\n\nCERTIFICATIONS\nBusiness Analysis Fundamentals (Udemy)\n",
+    "parsed": {
+      "contact": {"name": "Karan Mehta", "email": "karan.mehta@email.com", "phone": "+91 93456 78901", "location": "Ahmedabad, Gujarat", "links": ["linkedin.com/in/karanmehta"]},
+      "summary": "BBA graduate seeking a business analyst role to bridge business needs and technical teams.",
+      "experience": [
+        {"role": "Business Analyst Intern", "company": "FinServe Consulting", "location": "Ahmedabad", "start_date": "May 2024", "end_date": "Jul 2024", "bullets": ["Talked to clients to understand their requirements", "Made documents for the requirements", "Helped with some Excel reports"]}
+      ],
+      "education": [{"degree": "Bachelor of Business Administration", "institution": "Gujarat University", "start_date": "2022", "end_date": "2025", "details": "74%"}],
+      "skills": ["Requirement Gathering", "Excel", "SQL", "Documentation", "Wireframing", "Communication", "Agile"],
+      "projects": [{"name": "Expense Tracker Requirements Study", "description": "Requirements and wireframes for an expense app", "bullets": ["Gathered requirements for an expense app", "Made simple wireframes for the screens"], "technologies": ["Excel", "Figma"]}],
+      "certifications": ["Business Analysis Fundamentals (Udemy)"]
+    }
+  },
+  "jd": {
+    "title": "Business Analyst (Entry Level)",
+    "company": "FinEdge Solutions",
+    "raw_text": "Business Analyst (Entry Level) — FinEdge Solutions, Mumbai\n\nWe are hiring an entry-level Business Analyst to work with product and engineering teams in our fintech division.\n\nResponsibilities:\n- Gather and document business requirements (BRD, FRD)\n- Communicate with stakeholders to clarify needs\n- Analyze data in Excel and write SQL queries\n- Create wireframes using Figma or Balsamiq\n- Work in an Agile / Scrum environment\n\nRequired skills: requirement gathering, stakeholder communication, Excel, SQL, BRD, FRD, documentation, Agile, Scrum, wireframing.\nNice to have: Power BI, fintech domain knowledge, JIRA, UML.\n\nEligibility: BBA / BCA / B.Com freshers with strong communication and analytical skills."
+  }
+}

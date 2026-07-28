@@ -1,0 +1,23 @@
+{
+  "role": "Junior Developer",
+  "resume": {
+    "title": "Aarav Sharma — Junior Developer",
+    "raw_text": "AARAV SHARMA\nPune, Maharashtra | aarav.sharma@email.com | +91 98765 43210 | github.com/aaravsharma\n\nOBJECTIVE\nBCA graduate seeking a junior developer role to build reliable backend services.\n\nEDUCATION\nBachelor of Computer Applications, Savitribai Phule Pune University, 2022-2025, CGPA 8.1\n\nEXPERIENCE\nWeb Development Intern, Nexus Softwares, Pune, May 2024 - Jul 2024\n- Worked on the company website using React\n- Fixed some bugs in the login page\n- Wrote SQL queries for the reports section\n\nPROJECTS\nLibrary Management System — Python, Flask, SQLite\n- Made a web app to issue and return books\n- Added login for admin and students\n\nSKILLS\nPython, JavaScript, React, Flask, SQL, Git, HTML, CSS\n\nCERTIFICATIONS\nPython for Everybody (Coursera)\n",
+    "parsed": {
+      "contact": {"name": "Aarav Sharma", "email": "aarav.sharma@email.com", "phone": "+91 98765 43210", "location": "Pune, Maharashtra", "links": ["github.com/aaravsharma"]},
+      "summary": "BCA graduate seeking a junior developer role to build reliable backend services.",
+      "experience": [
+        {"role": "Web Development Intern", "company": "Nexus Softwares", "location": "Pune", "start_date": "May 2024", "end_date": "Jul 2024", "bullets": ["Worked on the company website using React", "Fixed some bugs in the login page", "Wrote SQL queries for the reports section"]}
+      ],
+      "education": [{"degree": "Bachelor of Computer Applications", "institution": "Savitribai Phule Pune University", "start_date": "2022", "end_date": "2025", "details": "CGPA 8.1"}],
+      "skills": ["Python", "JavaScript", "React", "Flask", "SQL", "Git", "HTML", "CSS"],
+      "projects": [{"name": "Library Management System", "description": "Web app to issue and return books", "bullets": ["Made a web app to issue and return books", "Added login for admin and students"], "technologies": ["Python", "Flask", "SQLite"]}],
+      "certifications": ["Python for Everybody (Coursera)"]
+    }
+  },
+  "jd": {
+    "title": "Junior Python Developer",
+    "company": "TechNova Solutions",
+    "raw_text": "Junior Python Developer — TechNova Solutions, Bengaluru\n\nWe are hiring a fresher Python developer to build and maintain REST APIs for our SaaS platform.\n\nResponsibilities:\n- Build REST APIs using Python and FastAPI or Flask\n- Write and optimize SQL queries against PostgreSQL\n- Collaborate using Git and participate in code reviews\n- Write unit tests with pytest\n\nRequired skills: Python, Flask or FastAPI, REST API design, SQL, PostgreSQL, Git, pytest, unit testing.\nNice to have: Docker, CI/CD, GitHub Actions, AWS, Linux.\n\nEligibility: BCA / B.Tech / B.Sc CS freshers welcome. Strong fundamentals in data structures expected."
+  }
+}

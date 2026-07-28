@@ -1,0 +1,10 @@
+Compare the job description against the resume. List skills/keywords/
+qualifications the JD asks for that are MISSING or WEAK in the resume.
+Only list items genuinely present in the JD text.
+
+JD (excerpts): $jd_chunks
+RESUME (excerpts): $resume_chunks
+
+Output JSON: {"gaps":[{"keyword":"...","importance":"high|medium|low",
+"present_in_resume":false,"suggestion":"where/how to add it honestly"}]}
+Output ONLY valid JSON.

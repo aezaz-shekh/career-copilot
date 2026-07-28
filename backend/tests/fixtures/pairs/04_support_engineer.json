@@ -1,0 +1,23 @@
+{
+  "role": "Support Engineer",
+  "resume": {
+    "title": "Sneha Iyer — Support Engineer",
+    "raw_text": "SNEHA IYER\nChennai, Tamil Nadu | sneha.iyer@email.com | +91 91234 56780\n\nOBJECTIVE\nBCA graduate seeking a technical support engineer role to solve user problems quickly and clearly.\n\nEDUCATION\nBachelor of Computer Applications, University of Madras, 2022-2025, 82%\n\nEXPERIENCE\nTechnical Support Intern, HelpDesk Pro, Chennai, Jul 2024 - Sep 2024\n- Answered customer tickets on email and chat\n- Helped users with password and login issues\n- Escalated hard problems to the senior team\n\nPROJECTS\nCampus IT Helpdesk Portal — HTML, PHP, MySQL\n- Built a portal for students to raise IT complaints\n- Added a status tracker for each ticket\n\nSKILLS\nTroubleshooting, Windows, Networking Basics, SQL, Customer Communication, Ticketing\n\nCERTIFICATIONS\nGoogle IT Support (Coursera)\n",
+    "parsed": {
+      "contact": {"name": "Sneha Iyer", "email": "sneha.iyer@email.com", "phone": "+91 91234 56780", "location": "Chennai, Tamil Nadu", "links": []},
+      "summary": "BCA graduate seeking a technical support engineer role to solve user problems quickly and clearly.",
+      "experience": [
+        {"role": "Technical Support Intern", "company": "HelpDesk Pro", "location": "Chennai", "start_date": "Jul 2024", "end_date": "Sep 2024", "bullets": ["Answered customer tickets on email and chat", "Helped users with password and login issues", "Escalated hard problems to the senior team"]}
+      ],
+      "education": [{"degree": "Bachelor of Computer Applications", "institution": "University of Madras", "start_date": "2022", "end_date": "2025", "details": "82%"}],
+      "skills": ["Troubleshooting", "Windows", "Networking Basics", "SQL", "Customer Communication", "Ticketing"],
+      "projects": [{"name": "Campus IT Helpdesk Portal", "description": "Portal for students to raise IT complaints", "bullets": ["Built a portal for students to raise IT complaints", "Added a status tracker for each ticket"], "technologies": ["HTML", "PHP", "MySQL"]}],
+      "certifications": ["Google IT Support (Coursera)"]
+    }
+  },
+  "jd": {
+    "title": "Technical Support Engineer",
+    "company": "CloudServe India",
+    "raw_text": "Technical Support Engineer — CloudServe India, Chennai\n\nWe need a customer-focused support engineer to troubleshoot issues for our cloud product users.\n\nResponsibilities:\n- Troubleshoot software and connectivity issues\n- Support Windows and Linux operating systems\n- Understand networking basics: TCP/IP, DNS, HTTP\n- Run basic SQL queries to check user data\n- Manage tickets in Zendesk or Freshdesk\n- Communicate clearly with non-technical customers\n\nRequired skills: troubleshooting, Windows, Linux, networking, TCP/IP, DNS, SQL, ticketing, communication.\nNice to have: scripting (Python or Bash), cloud (AWS or Azure), knowledge base writing.\n\nEligibility: BCA / B.Sc / B.Tech freshers with strong communication."
+  }
+}
