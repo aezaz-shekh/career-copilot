@@ -50,8 +50,10 @@ def _resolve_binary(path: Path) -> str | None:
 
 
 def stt_available() -> bool:
-    """True if both the whisper binary and the model are present."""
+    """True if voice is enabled and both the whisper binary and model exist."""
     settings = get_settings()
+    if not settings.VOICE_ENABLED:
+        return False
     return _resolve_binary(settings.WHISPER_BIN) is not None and settings.WHISPER_MODEL.is_file()
 
 

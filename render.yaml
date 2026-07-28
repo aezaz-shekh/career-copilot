@@ -1,0 +1,38 @@
+# Render blueprint — https://render.com/docs/blueprint-spec
+#
+# Render reads this on "New > Blueprint" and configures the service, so the
+# dashboard fields do not have to be filled in by hand.
+#
+# The build context is the repository root because hf/Dockerfile copies
+# backend/, frontend/ and prompts/.
+#
+# Voice is off here. The free instance has 512 MB, shared between the app, the
+# embedding model, whisper and Piper; transcription pushes past that and the OOM
+# killer takes the whole process rather than just the transcription. With
+# VOICE_ENABLED=false the app reports voice as unavailable and stays in text
+# mode by design. Raise it on an instance with more memory.
+
+services:
+  - type: web
+    name: career-copilot
+    runtime: docker
+    dockerfilePath: ./hf/Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: VOICE_ENABLED
+        value: "false"
+
+      # Chat is answered by Groq; the UI reads this to label itself honestly
+      # instead of claiming generation is local.
+      - key: INFERENCE_PROVIDER
+        value: Groq
+
+      # Set these in the dashboard — never commit them.
+      #   GROQ_API_KEY  the Groq key that answers chat
+      #   APP_PASSWORD  shared password; without it the URL is wide open
+      - key: GROQ_API_KEY
+        sync: false
+      - key: APP_PASSWORD
+        sync: false

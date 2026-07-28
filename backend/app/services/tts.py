@@ -41,8 +41,10 @@ def _resolve_binary(path: Path) -> str | None:
 
 
 def tts_available() -> bool:
-    """True if both the Piper binary and a voice model are present."""
+    """True if voice is enabled and both the Piper binary and voice model exist."""
     settings = get_settings()
+    if not settings.VOICE_ENABLED:
+        return False
     return _resolve_binary(settings.PIPER_BIN) is not None and settings.PIPER_VOICE.is_file()
 
 

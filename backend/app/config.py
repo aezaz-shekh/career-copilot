@@ -95,6 +95,13 @@ class Settings(BaseSettings):
     # any other installed Piper voice (both the .onnx and .onnx.json must exist).
     PIPER_VOICE: Path = PROJECT_ROOT / "voice" / "piper" / "en_US-amy-medium.onnx"
 
+    # Explicit off switch for voice, independent of whether the binaries exist.
+    # Small hosts (Render's 512 MB free tier) cannot hold the app, the embedding
+    # model, whisper and Piper at once, and the OOM killer takes the whole
+    # process rather than just the transcription. Setting VOICE_ENABLED=false
+    # there degrades to text-only by design instead of dying mid-answer.
+    VOICE_ENABLED: bool = True
+
     STT_TIMEOUT: float = 120.0  # transcribing a short answer on CPU
     TTS_TIMEOUT: float = 60.0
 

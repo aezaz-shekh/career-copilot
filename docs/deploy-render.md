@@ -45,7 +45,13 @@ so the push stays small and no personal data leaves your machine.
 
 ## Step 3 — Create the Render service
 
-https://dashboard.render.com → **New** → **Web Service** → connect the repo.
+The repository has a `render.yaml`, so the quickest path is
+https://dashboard.render.com → **New** → **Blueprint** → connect the repo:
+Render reads the file and fills in the runtime, Dockerfile path, build context,
+plan, health check and `VOICE_ENABLED` itself. You only supply the two secrets
+in Step 4.
+
+To configure it by hand instead (**New** → **Web Service**):
 
 | Field | Value |
 |---|---|
@@ -66,6 +72,8 @@ In the same form (or Settings → Environment) add:
 |---|---|
 | `GROQ_API_KEY` | your Groq key |
 | `APP_PASSWORD` | a password you choose |
+
+(`VOICE_ENABLED=false` and `INFERENCE_PROVIDER=Groq` come from `render.yaml`.)
 
 Login will be `examiner` / that password. Without `APP_PASSWORD` the app is
 wide open — it has no login of its own, so anyone with the URL could read
@@ -91,7 +99,7 @@ When the log shows `Uvicorn running`, open your URL.
 | Badge | **Connected**, not Offline |
 | Ask a question | Answer in seconds |
 | Status tab | No missing models |
-| Mock interview | Microphone works, question is spoken aloud |
+| Mock interview | Runs in text mode (voice is off on the free tier) |
 
 ---
 
@@ -101,10 +109,17 @@ When the log shows `Uvicorn running`, open your URL.
 it. Idle sits around 300–400 MB; transcription can push past the cap and get
 the process OOM-killed (Render shows "Out of memory" and restarts).
 
-If that happens, disable voice and keep everything else: in Settings →
-Environment, **delete `WHISPER_BIN` and `PIPER_BIN`**. `stt_available()` and
-`tts_available()` then return `False` and the app degrades to text-only by
-design — no code change, no crash.
+Voice is therefore **off by default here**: `render.yaml` sets
+`VOICE_ENABLED=false`, and `stt_available()` / `tts_available()` return `False`
+so the app stays in text mode by design — no code change, no crash. The other
+four modules are unaffected.
+
+(Deleting `WHISPER_BIN` / `PIPER_BIN` in the dashboard also works, but those are
+`ENV` lines in the Dockerfile and the dashboard cannot unset them, only blank
+them — `VOICE_ENABLED` is the explicit switch.)
+
+To try voice anyway, set `VOICE_ENABLED=true` on a paid instance with more
+memory. On the free tier expect the process to be OOM-killed mid-transcription.
 
 **Spins down after 15 minutes idle.** The next visitor waits ~50 seconds while
 it restarts. Prevent it with a free **UptimeRobot** monitor hitting

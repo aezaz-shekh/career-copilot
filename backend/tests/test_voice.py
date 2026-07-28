@@ -255,3 +255,25 @@ def test_speak_endpoint_501_when_unavailable(monkeypatch: pytest.MonkeyPatch) ->
 
     response = client.post("/api/voice/speak", json={"text": "hi"})
     assert response.status_code == 501
+
+
+# --------------------------------------------------------------------------- #
+# VOICE_ENABLED kill switch
+#
+# Small hosts cannot hold whisper and Piper alongside the app, so voice has to
+# be switchable off from the environment even when the binaries are installed.
+# --------------------------------------------------------------------------- #
+
+
+def test_voice_reports_unavailable_when_disabled(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("VOICE_ENABLED", "false")
+    get_settings.cache_clear()
+
+    assert stt.stt_available() is False
+    assert tts.tts_available() is False
+
+    body = TestClient(app).get("/api/voice/status").json()
+    assert body["stt_available"] is False
+    assert body["tts_available"] is False
+
+    get_settings.cache_clear()
