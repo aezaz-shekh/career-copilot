@@ -156,21 +156,42 @@ function whenVoicesReady() {
  * most robotic one, so prefer the known-good names first and fall back to any
  * local English voice before letting the browser choose.
  */
+// Warm, natural female voices, best first. The project's own Piper voice is
+// female (en_US-amy-medium), so the browser tier matching that keeps the app
+// sounding like itself wherever it runs.
 const PREFERRED_VOICES = [
-  'Google US English',
-  'Samantha',
+  'Samantha', // macOS/iOS — the most natural of the built-ins
+  'Google US English', // Chrome — female despite the neutral name
   'Microsoft Aria Online (Natural) - English (United States)',
+  'Microsoft Jenny Online (Natural) - English (United States)',
   'Microsoft Zira - English (United States)',
+  'Karen',
+  'Moira',
+  'Tessa',
 ]
+
+// Names that reliably indicate a female voice, for browsers whose list does not
+// include any of the above.
+const FEMALE_HINTS = /samantha|karen|moira|tessa|victoria|fiona|zira|aria|jenny|female|woman/i
+
+// Default rate is noticeably brisk for an interview question you are meant to
+// think about. Slightly under 1 reads as measured rather than hurried.
+const SPEECH_RATE = 0.92
+// A touch above neutral keeps a lower voice from sounding flat.
+const SPEECH_PITCH = 1.05
 
 function pickVoice(voices) {
   for (const name of PREFERRED_VOICES) {
     const match = voices.find((v) => v.name === name)
     if (match) return match
   }
-  return voices.find((v) => v.lang?.startsWith('en') && v.localService) ||
-    voices.find((v) => v.lang?.startsWith('en')) ||
+  const english = voices.filter((v) => v.lang?.startsWith('en'))
+  return (
+    english.find((v) => FEMALE_HINTS.test(v.name)) ||
+    english.find((v) => v.localService) ||
+    english[0] ||
     null
+  )
 }
 
 /**
@@ -192,8 +213,8 @@ async function browserSpeak(text) {
     const voice = pickVoice(voices)
     if (voice) utterance.voice = voice
     utterance.lang = voice?.lang || 'en-US'
-    utterance.rate = 1.0
-    utterance.pitch = 1.0
+    utterance.rate = SPEECH_RATE
+    utterance.pitch = SPEECH_PITCH
 
     let settled = false
     const finish = () => {
@@ -203,7 +224,7 @@ async function browserSpeak(text) {
       resolve()
     }
     // ~12 characters a second, plus headroom, then give up waiting.
-    const watchdog = setTimeout(finish, (text.length / 12) * 1000 + 5000)
+    const watchdog = setTimeout(finish, (text.length / (12 * SPEECH_RATE)) * 1000 + 5000)
 
     // Resolve either way: a failed line must never block the interview.
     utterance.onend = finish
@@ -314,7 +335,17 @@ export function describeProvider({ stt, tts }) {
  *
  * @returns {Promise<boolean>} whether anything was actually spoken.
  */
-export async function speakOnce(text) {
+export async function speakOnce(text, { preferServer = false } = {}) {
+  // The greeting is the first thing a visitor hears, and Piper is a network
+  // round-trip away — on a hosted instance that is seconds of silence before
+  // anything happens. The browser speaks immediately, so for a one-off line it
+  // wins on latency even though Piper wins on quality. Callers that can afford
+  // the wait pass preferServer.
+  if (!preferServer && browserTtsSupported()) {
+    await browserSpeak(text)
+    return true
+  }
+
   try {
     const url = await api.speak(text)
     const audio = new Audio(url)

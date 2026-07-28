@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { api } from './api.js'
+import { api, isRequestInFlight } from './api.js'
 import { prewarmSpeech, speakOnce } from './lib/speech.js'
 import ToastHost from './components/ToastHost.jsx'
 import WelcomeModal from './components/WelcomeModal.jsx'
@@ -172,8 +172,14 @@ export default function App() {
   // until then the last good health is kept and the UI stays usable.
   const FAILURES_BEFORE_OFFLINE = 3
   const failureCount = useRef(0)
+  // True while a poll is in flight, so a slow one is not overlapped by the next
+  // tick — overlapping polls pile up against the browser's per-host connection
+  // limit and start timing each other out.
+  const polling = useRef(false)
 
   const checkHealth = useCallback(async () => {
+    if (polling.current) return
+    polling.current = true
     setLoading(true)
     try {
       const controller = new AbortController()
@@ -191,12 +197,17 @@ export default function App() {
       failureCount.current = 0
     } catch {
       failureCount.current += 1
-      if (failureCount.current >= FAILURES_BEFORE_OFFLINE) {
+      // While one of the user's own requests is in flight — a resume upload, a
+      // long generation — the poll can be queued behind it and abort. That is
+      // congestion, not an outage, so hold the last known state until the app
+      // is quiet again.
+      if (failureCount.current >= FAILURES_BEFORE_OFFLINE && !isRequestInFlight()) {
         setHealth(null)
         setBackendError('Cannot reach the backend API.')
       }
       // Below the threshold: keep the last known health and say nothing.
     } finally {
+      polling.current = false
       setLoading(false)
       setCheckedAt(new Date())
     }

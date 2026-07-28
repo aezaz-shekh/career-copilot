@@ -47,12 +47,22 @@ const LONG_TIMEOUT_MS = 12 * 60 * 1000
 // Every request failure also raises a toast (with the fix hint), so a dropped
 // backend or a down Ollama is visible app-wide, not only where a component
 // happens to render the error inline (Prompt 4.1, friendly error handling).
+// How many app requests are in flight. The health poll reads this: a browser
+// only opens a few connections per host, so while an upload or a long
+// generation is running the poll can be queued behind it and time out. That is
+// congestion, not an outage, and must not flip the UI to "Offline".
+let inFlight = 0
+export const isRequestInFlight = () => inFlight > 0
+
 async function request(path, options) {
+  inFlight += 1
   try {
     return await _request(path, options)
   } catch (err) {
     if (err instanceof ApiError) pushToast({ title: err.message, hint: err.hint })
     throw err
+  } finally {
+    inFlight -= 1
   }
 }
 

@@ -117,3 +117,49 @@ describe('stripMarkdown', () => {
     expect(stripMarkdown('1. first\n2. second\n\n> quoted')).toBe('first second quoted')
   })
 })
+
+describe('voice selection', () => {
+  // The project's Piper voice is female (en_US-amy-medium), so the browser tier
+  // should match it rather than picking whatever the browser lists first.
+  const voicesFrom = (names) =>
+    names.map((name) => ({ name, lang: 'en-US', localService: true }))
+
+  async function pick(names) {
+    setBrowserSupport({ stt: false, tts: true })
+    vi.stubGlobal('speechSynthesis', {
+      getVoices: () => voicesFrom(names),
+      // Fire onend so browserSpeak resolves instead of waiting on its watchdog.
+      speak: (utterance) => utterance.onend?.(),
+      cancel() {},
+      addEventListener() {},
+      removeEventListener() {},
+    })
+    let spoken = null
+    vi.stubGlobal(
+      'SpeechSynthesisUtterance',
+      function Utterance(text) {
+        this.text = text
+        spoken = this
+      },
+    )
+    const { speakOnce } = await import('./speech.js?voice=' + names.join('-'))
+    await speakOnce('hello')
+    return spoken
+  }
+
+  it('prefers a known natural female voice over the first listed', async () => {
+    const utterance = await pick(['Alex', 'Samantha', 'Daniel'])
+    expect(utterance.voice?.name).toBe('Samantha')
+  })
+
+  it('falls back to a female-sounding name when none are known', async () => {
+    const utterance = await pick(['Alex', 'Victoria', 'Daniel'])
+    expect(utterance.voice?.name).toBe('Victoria')
+  })
+
+  it('reads at a measured rate rather than the brisk default', async () => {
+    const utterance = await pick(['Samantha'])
+    expect(utterance.rate).toBeLessThan(1)
+    expect(utterance.rate).toBeGreaterThan(0.8)
+  })
+})
