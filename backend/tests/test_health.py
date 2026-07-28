@@ -83,3 +83,42 @@ def test_untagged_model_matches_latest_tag() -> None:
 def test_root_banner() -> None:
     body = client.get("/").json()
     assert body["health"] == "/health"
+
+
+# --------------------------------------------------------------------------- #
+# Inference mode
+#
+# The UI's privacy copy is driven by these fields, so a regression here would
+# make the app claim generation is local while a remote provider answers chat.
+# --------------------------------------------------------------------------- #
+
+
+def _clear_settings_cache() -> None:
+    """Drop the cached Settings so the next read picks up patched env vars."""
+    get_settings.cache_clear()
+
+
+def test_health_reports_local_mode_by_default(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("INFERENCE_PROVIDER", raising=False)
+    _clear_settings_cache()
+    _stub_models(monkeypatch, [])
+
+    body = client.get("/health").json()
+
+    assert body["inference_mode"] == "local"
+    assert body["inference_provider"] is None
+    _clear_settings_cache()
+
+
+def test_health_reports_hosted_mode_when_provider_configured(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("INFERENCE_PROVIDER", "Groq")
+    _clear_settings_cache()
+    _stub_models(monkeypatch, [])
+
+    body = client.get("/health").json()
+
+    assert body["inference_mode"] == "hosted"
+    assert body["inference_provider"] == "Groq"
+    _clear_settings_cache()

@@ -41,7 +41,7 @@ export default function WelcomeModal({ onDone }) {
             🚀
           </div>
           <h2 className="text-2xl font-bold tracking-tight">AI Career Co-Pilot</h2>
-          <p className="mt-1 text-sm text-white/80">Private · Local · Yours · ₹0</p>
+          <p className="mt-1 text-sm text-white/80">Private · Yours · ₹0</p>
         </div>
 
         <div className="p-8">

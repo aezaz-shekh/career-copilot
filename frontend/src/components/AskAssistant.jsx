@@ -208,6 +208,9 @@ export default function AskAssistant({ hero = false, greeting = '', belowWelcome
   const [answering, setAnswering] = useState(false)
   const [error, setError] = useState(null)
   const [sttAvailable, setSttAvailable] = useState(false)
+  // Whether chat is answered on this machine or by a hosted provider, so the
+  // captions below state what is actually true for this deployment.
+  const [isHosted, setIsHosted] = useState(false)
   const [attachment, setAttachment] = useState(null) // {name, text}
   const [uploading, setUploading] = useState(false)
   const recorderRef = useRef(null)
@@ -225,6 +228,10 @@ export default function AskAssistant({ hero = false, greeting = '', belowWelcome
       .voiceStatus()
       .then((v) => setSttAvailable(Boolean(v?.stt_available)))
       .catch(() => setSttAvailable(false))
+    api
+      .health()
+      .then((h) => setIsHosted(h?.inference_mode === 'hosted'))
+      .catch(() => setIsHosted(false))
     return () => abortRef.current?.()
   }, [])
 
@@ -517,7 +524,11 @@ export default function AskAssistant({ hero = false, greeting = '', belowWelcome
       </div>
 
       <div className="mt-2 flex items-center justify-between px-1">
-        <p className="text-[11px] text-slate-400">Answers run locally — nothing leaves your machine.</p>
+        <p className="text-[11px] text-slate-400">
+          {isHosted
+            ? 'Your resumes and history stay in this app’s own database.'
+            : 'Answers run locally — nothing leaves your machine.'}
+        </p>
         {hasChat && (
           <button
             type="button"
@@ -549,7 +560,9 @@ export default function AskAssistant({ hero = false, greeting = '', belowWelcome
               {greeting || 'How can I help?'}
             </h1>
             <p className="mt-2 text-slate-500">
-              Ask me anything about your career — answered locally on your machine.
+              {isHosted
+                ? 'Ask me anything about your career.'
+                : 'Ask me anything about your career — answered locally on your machine.'}
             </p>
             <div className="mt-8 w-full max-w-2xl">{composer}</div>
             <div className="mt-5 w-full max-w-2xl">{chips}</div>
@@ -575,7 +588,11 @@ export default function AskAssistant({ hero = false, greeting = '', belowWelcome
   return (
     <Card
       title="Ask your Career Co-Pilot"
-      subtitle="Type or speak a career question — answered locally by your AI."
+      subtitle={
+        isHosted
+          ? 'Type or speak a career question.'
+          : 'Type or speak a career question — answered locally by your AI.'
+      }
     >
       {!hasChat && <div className="mb-3">{chips}</div>}
       {hasChat && <div className="mb-3 max-h-[24rem] overflow-y-auto">{thread}</div>}

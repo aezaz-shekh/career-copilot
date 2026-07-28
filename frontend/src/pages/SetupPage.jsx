@@ -192,7 +192,7 @@ export default function SetupPage() {
       <Card title="Where your data lives">
         <p className="mt-2 font-mono text-xs text-slate-600">{status.data_path}</p>
         <p className="mt-1 text-sm text-slate-500">
-          One local SQLite file. Nothing leaves this machine.
+          One SQLite file. Your resumes, answers and contacts are stored only here.
         </p>
       </Card>
     </div>

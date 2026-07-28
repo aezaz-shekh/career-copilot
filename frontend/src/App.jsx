@@ -21,6 +21,11 @@ const STATUS = {
     dot: 'bg-emerald-500',
     cls: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
   },
+  connectedHosted: {
+    label: 'Hosted AI · Connected',
+    dot: 'bg-emerald-500',
+    cls: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+  },
   degraded: {
     label: 'Setup incomplete',
     dot: 'bg-amber-500',
@@ -219,13 +224,21 @@ export default function App() {
     return () => window.removeEventListener('popstate', onPop)
   }, [])
 
+  // Generation runs on this machine unless the backend reports a hosted
+  // provider, so the privacy copy below can state what is actually true rather
+  // than claiming "local" on a deployment where chat is answered remotely.
+  const isHosted = health?.inference_mode === 'hosted'
+  const providerName = health?.inference_provider ?? 'a hosted provider'
+
   let state = 'checking'
   if (!loading || health || backendError) {
     if (backendError) state = 'offline'
-    else if (health?.status === 'ok') state = 'connected'
+    else if (health?.status === 'ok') state = isHosted ? 'connectedHosted' : 'connected'
     else if (health) state = health.ollama?.reachable ? 'degraded' : 'offline'
   }
 
+  // Both connected variants are healthy; only the label differs.
+  const isConnected = state === 'connected' || state === 'connectedHosted'
   const status = STATUS[state] ?? STATUS.checking
   const renderNavItem = (item) => (
     <button
@@ -239,7 +252,7 @@ export default function App() {
     >
       <NavIcon id={item.id} />
       <span className="flex-1 text-left">{item.label}</span>
-      {SYSTEM_TABS.has(item.id) && state !== 'connected' && (
+      {SYSTEM_TABS.has(item.id) && !isConnected && (
         <span
           className={`h-2 w-2 rounded-full ${state === 'offline' ? 'bg-rose-500' : 'bg-amber-500'}`}
         />
@@ -259,7 +272,7 @@ export default function App() {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5">
               <path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6l8-4z" />
             </svg>
-            100% local &amp; private
+            {isHosted ? 'Private · your data stays here' : '100% local & private'}
           </span>
           <span className="flex items-center gap-1.5">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5">
@@ -334,7 +347,9 @@ export default function App() {
               <p className="truncate bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-base font-extrabold text-transparent">
                 Career Co-Pilot
               </p>
-              <p className="truncate text-[11px] text-slate-400">On-device assistant</p>
+              <p className="truncate text-[11px] text-slate-400">
+                {isHosted ? 'Career assistant' : 'On-device assistant'}
+              </p>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
@@ -382,12 +397,12 @@ export default function App() {
           ) : (
             <div className="px-4 py-8 sm:px-8">
               <div className="mx-auto max-w-4xl">
-                {tab === 'resume' && <ResumePage ready={state === 'connected'} />}
+                {tab === 'resume' && <ResumePage ready={isConnected} />}
                 {tab === 'jd' && <JobDescriptionPage />}
-                {tab === 'review' && <ReviewPage ready={state === 'connected'} />}
-                {tab === 'interview' && <InterviewPage ready={state === 'connected'} />}
-                {tab === 'roadmap' && <RoadmapPage ready={state === 'connected'} />}
-                {tab === 'outreach' && <OutreachPage ready={state === 'connected'} />}
+                {tab === 'review' && <ReviewPage ready={isConnected} />}
+                {tab === 'interview' && <InterviewPage ready={isConnected} />}
+                {tab === 'roadmap' && <RoadmapPage ready={isConnected} />}
+                {tab === 'outreach' && <OutreachPage ready={isConnected} />}
                 {tab === 'setup' && <SetupPage />}
                 {tab === 'settings' && <SettingsPage />}
                 {tab === 'status' && (

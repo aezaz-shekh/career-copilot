@@ -42,6 +42,13 @@ class Settings(BaseSettings):
     # IPv6 ::1 first and add a connection delay on every request.
     OLLAMA_URL: str = "http://127.0.0.1:11434"
 
+    # Name of the remote provider answering chat, when one is in use. Empty means
+    # generation runs locally through Ollama, which is the default everywhere
+    # except the hosted deployment — the Ollama-compatible shim sets it so the UI
+    # can say where inference actually happens instead of claiming "local"
+    # unconditionally. Embeddings, voice and storage stay local either way.
+    INFERENCE_PROVIDER: str = ""
+
     # Default chat model. 3B keeps the app usable on 8 GB RAM with no GPU.
     # Never raise this above 4B as a default without re-checking the hardware.
     CHAT_MODEL: str = "llama3.2:3b"

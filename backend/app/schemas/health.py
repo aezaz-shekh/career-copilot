@@ -29,6 +29,18 @@ class HealthResponse(BaseModel):
     status: Literal["ok", "degraded"]
     app: str
     version: str
+    inference_mode: Literal["local", "hosted"] = Field(
+        default="local",
+        description=(
+            "Where generation actually runs. 'local' means Ollama on this machine "
+            "and no text leaves it; 'hosted' means a remote provider answers chat. "
+            "The UI reads this so its privacy copy states what is actually true."
+        ),
+    )
+    inference_provider: str | None = Field(
+        default=None,
+        description="Name of the hosted provider when inference_mode is 'hosted'.",
+    )
     ollama: OllamaStatus
     models_required: dict[str, str] = Field(
         description="Role -> model name, e.g. {'chat': 'llama3.2:3b'}"

@@ -33,6 +33,10 @@ async def health() -> HealthResponse:
         "embed": settings.EMBED_MODEL,
     }
 
+    # Set only by the hosted deployment's shim; empty on a laptop.
+    provider = settings.INFERENCE_PROVIDER.strip()
+    mode = "hosted" if provider else "local"
+
     try:
         installed = await list_models()
     except OllamaError as exc:
@@ -41,6 +45,8 @@ async def health() -> HealthResponse:
             status="degraded",
             app=settings.APP_NAME,
             version=settings.APP_VERSION,
+            inference_mode=mode,
+            inference_provider=provider or None,
             ollama=OllamaStatus(
                 reachable=False,
                 url=settings.OLLAMA_URL,
@@ -62,6 +68,8 @@ async def health() -> HealthResponse:
         status="ok" if not missing else "degraded",
         app=settings.APP_NAME,
         version=settings.APP_VERSION,
+        inference_mode=mode,
+        inference_provider=provider or None,
         ollama=OllamaStatus(
             reachable=True,
             url=settings.OLLAMA_URL,

@@ -82,6 +82,12 @@ ENV HOME=/home/user \
 ENV HF_EMBED_MODEL=BAAI/bge-small-en-v1.5 \
     EMBED_DIM=384
 
+# Chat is answered by Groq here, not by Ollama on the visitor's machine. The app
+# reports this on /health so the UI states where inference actually runs instead
+# of claiming "local" unconditionally. Embeddings, voice and storage stay in the
+# container regardless.
+ENV INFERENCE_PROVIDER=Groq
+
 COPY backend/requirements.txt /tmp/requirements.txt
 COPY hf/requirements-hf.txt /tmp/requirements-hf.txt
 RUN pip install -r /tmp/requirements.txt -r /tmp/requirements-hf.txt
