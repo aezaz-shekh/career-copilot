@@ -27,3 +27,6 @@ the container.
 
 The application code is identical in both modes. The swap happens behind
 `OLLAMA_URL`, which is why nothing in `app/` changes between them.
+
+Full project documentation, architecture and setup instructions:
+[`docs/PROJECT-README.md`](docs/PROJECT-README.md).
