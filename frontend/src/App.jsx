@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { api } from './api.js'
-import { speakOnce } from './lib/speech.js'
+import { prewarmSpeech, speakOnce } from './lib/speech.js'
 import ToastHost from './components/ToastHost.jsx'
 import WelcomeModal from './components/WelcomeModal.jsx'
 import DashboardPage from './pages/DashboardPage.jsx'
@@ -166,19 +166,36 @@ export default function App() {
     await speakOnce(`Hello ${who}, welcome to AI Career Co-Pilot`)
   }
 
+  // A free host sleeps when idle and takes seconds to answer the first request
+  // after waking, so a single slow poll is normal and must not be reported as
+  // an outage. Only after this many consecutive failures does the badge flip —
+  // until then the last good health is kept and the UI stays usable.
+  const FAILURES_BEFORE_OFFLINE = 3
+  const failureCount = useRef(0)
+
   const checkHealth = useCallback(async () => {
     setLoading(true)
     try {
       const controller = new AbortController()
-      const timer = setTimeout(() => controller.abort(), 8000)
-      const response = await fetch('/health', { signal: controller.signal })
+      // Generous: a cold start can take tens of seconds, and aborting early is
+      // what makes a waking host look permanently down.
+      const timer = setTimeout(() => controller.abort(), 30000)
+      const response = await fetch('/health', {
+        signal: controller.signal,
+        cache: 'no-store',
+      })
       clearTimeout(timer)
       if (!response.ok) throw new Error(`Backend returned HTTP ${response.status}`)
       setHealth(await response.json())
       setBackendError(null)
+      failureCount.current = 0
     } catch {
-      setHealth(null)
-      setBackendError('Cannot reach the backend API at 127.0.0.1:8000.')
+      failureCount.current += 1
+      if (failureCount.current >= FAILURES_BEFORE_OFFLINE) {
+        setHealth(null)
+        setBackendError('Cannot reach the backend API.')
+      }
+      // Below the threshold: keep the last known health and say nothing.
     } finally {
       setLoading(false)
       setCheckedAt(new Date())
@@ -190,6 +207,10 @@ export default function App() {
     const id = setInterval(checkHealth, POLL_INTERVAL_MS)
     return () => clearInterval(id)
   }, [checkHealth])
+
+  // Load the browser's voice list now, so the first spoken question does not
+  // pay for it and start late.
+  useEffect(prewarmSpeech, [])
 
   // Wire tab switches into browser history so the Back button moves between
   // screens (and lands on Home) instead of leaving the app.

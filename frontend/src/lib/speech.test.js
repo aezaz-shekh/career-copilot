@@ -5,7 +5,13 @@
  */
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { browserSttSupported, browserTtsSupported, describeProvider, selectProviders } from './speech.js'
+import {
+  browserSttSupported,
+  browserTtsSupported,
+  describeProvider,
+  selectProviders,
+  stripMarkdown,
+} from './speech.js'
 
 const SERVER_ON = { stt_available: true, tts_available: true }
 const SERVER_OFF = { stt_available: false, tts_available: false }
@@ -84,5 +90,30 @@ describe('capability detection', () => {
   it('detects speechSynthesis when the browser provides it', () => {
     setBrowserSupport({ stt: false, tts: true })
     expect(browserTtsSupported()).toBe(true)
+  })
+})
+
+describe('stripMarkdown', () => {
+  // The assistant answers in Markdown, so the markup has to come off before the
+  // text reaches a synthesiser or it is read out as "hash hash", "star star".
+  it('removes headings, emphasis and bullets', () => {
+    const spoken = stripMarkdown('## Title\n\n**Bold** text\n\n- one\n- two')
+    expect(spoken).not.toMatch(/[#*-]/)
+    expect(spoken).toContain('Title')
+    expect(spoken).toContain('Bold text')
+  })
+
+  it('keeps link labels and drops the URL', () => {
+    expect(stripMarkdown('See [the guide](https://example.com/x) now')).toBe(
+      'See the guide now',
+    )
+  })
+
+  it('collapses fenced code rather than reading it aloud', () => {
+    expect(stripMarkdown('Try:\n\n```js\nconst x = 1\n```\n\ndone')).not.toContain('const')
+  })
+
+  it('strips numbered lists and block quotes', () => {
+    expect(stripMarkdown('1. first\n2. second\n\n> quoted')).toBe('first second quoted')
   })
 })

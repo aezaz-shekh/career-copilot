@@ -115,21 +115,101 @@ function createBrowserListener() {
   }
 }
 
-/** Speak via the browser, resolving when playback finishes. */
-function browserSpeak(text) {
-  return new Promise((resolve) => {
-    if (!browserTtsSupported() || !text) {
-      resolve()
+/**
+ * Resolve once the browser has actually populated its voice list.
+ *
+ * getVoices() is empty on the first call in Chrome — the list arrives later on
+ * a voiceschanged event. Speaking before it lands is what makes the first
+ * utterance come out in the wrong voice, or not at all, so callers wait here.
+ * Cached after the first success; the timeout keeps a browser that never fires
+ * the event from blocking speech forever.
+ */
+let voicesReady = null
+function whenVoicesReady() {
+  if (voicesReady) return voicesReady
+  voicesReady = new Promise((resolve) => {
+    const synth = globalThis.speechSynthesis
+    if (!synth) {
+      resolve([])
       return
     }
+    const existing = synth.getVoices()
+    if (existing.length) {
+      resolve(existing)
+      return
+    }
+    const done = () => {
+      clearTimeout(timer)
+      synth.removeEventListener?.('voiceschanged', done)
+      resolve(synth.getVoices())
+    }
+    const timer = setTimeout(done, 1500)
+    synth.addEventListener?.('voiceschanged', done)
+  })
+  return voicesReady
+}
+
+/**
+ * Pick a natural-sounding English voice.
+ *
+ * Browsers list system voices in no useful order and the default is often the
+ * most robotic one, so prefer the known-good names first and fall back to any
+ * local English voice before letting the browser choose.
+ */
+const PREFERRED_VOICES = [
+  'Google US English',
+  'Samantha',
+  'Microsoft Aria Online (Natural) - English (United States)',
+  'Microsoft Zira - English (United States)',
+]
+
+function pickVoice(voices) {
+  for (const name of PREFERRED_VOICES) {
+    const match = voices.find((v) => v.name === name)
+    if (match) return match
+  }
+  return voices.find((v) => v.lang?.startsWith('en') && v.localService) ||
+    voices.find((v) => v.lang?.startsWith('en')) ||
+    null
+}
+
+/**
+ * Speak via the browser, resolving when playback finishes.
+ *
+ * Chrome stops firing `onend` if an utterance runs past roughly fifteen
+ * seconds, which would leave the interview waiting on a promise that never
+ * settles. The watchdog below resolves on a duration estimated from the text
+ * so the flow always continues.
+ */
+async function browserSpeak(text) {
+  if (!browserTtsSupported() || !text) return
+  const voices = await whenVoicesReady()
+  const synth = globalThis.speechSynthesis
+  if (!synth) return
+
+  return new Promise((resolve) => {
     const utterance = new globalThis.SpeechSynthesisUtterance(text)
+    const voice = pickVoice(voices)
+    if (voice) utterance.voice = voice
+    utterance.lang = voice?.lang || 'en-US'
     utterance.rate = 1.0
     utterance.pitch = 1.0
-    // Resolve either way: a failed greeting must never block the interview.
-    utterance.onend = resolve
-    utterance.onerror = resolve
-    globalThis.speechSynthesis.cancel() // drop anything still queued
-    globalThis.speechSynthesis.speak(utterance)
+
+    let settled = false
+    const finish = () => {
+      if (settled) return
+      settled = true
+      clearTimeout(watchdog)
+      resolve()
+    }
+    // ~12 characters a second, plus headroom, then give up waiting.
+    const watchdog = setTimeout(finish, (text.length / 12) * 1000 + 5000)
+
+    // Resolve either way: a failed line must never block the interview.
+    utterance.onend = finish
+    utterance.onerror = finish
+    synth.cancel() // drop anything still queued
+    synth.speak(utterance)
   })
 }
 
@@ -251,6 +331,50 @@ export async function speakOnce(text) {
   if (!browserTtsSupported()) return false
   await browserSpeak(text)
   return true
+}
+
+/**
+ * Start loading the browser's voice list before anything needs to speak.
+ *
+ * The first getVoices() call is what costs the delay, so paying it during app
+ * start means the first spoken question begins immediately instead of after a
+ * pause. Safe to call anywhere: it is idempotent and never throws.
+ */
+/**
+ * Flatten Markdown into something worth listening to.
+ *
+ * The assistant is prompted to answer in Markdown, so the raw text is full of
+ * "##", "**" and "-". Spoken verbatim those become "hash hash", "star star" —
+ * the markup has to come off before the text reaches a synthesiser.
+ */
+export function stripMarkdown(markdown) {
+  return markdown
+    .replace(/```[\s\S]*?```/g, ' code block ') // fenced code reads as noise
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1') // links: keep the label
+    .replace(/^\s{0,3}#{1,6}\s+/gm, '')
+    .replace(/^\s*[-*_]{3,}\s*$/gm, '') // horizontal rules
+    .replace(/^\s*[-*+]\s+/gm, '')
+    .replace(/^\s*\d+\.\s+/gm, '')
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/\*([^*]+)\*/g, '$1')
+    .replace(/^\s*>\s?/gm, '')
+    .replace(/\n{2,}/g, '. ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+/** Stop anything currently being spoken (navigating away, closing a chat). */
+export function stopSpeaking() {
+  try {
+    globalThis.speechSynthesis?.cancel()
+  } catch {
+    /* nothing to cancel */
+  }
+}
+
+export function prewarmSpeech() {
+  if (browserTtsSupported()) whenVoicesReady()
 }
 
 export { ApiError, MicPermissionError }

@@ -1,7 +1,13 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { api, streamAsk } from '../api.js'
 import { MicPermissionError } from '../lib/recorder.js'
-import { createListener, selectProviders } from '../lib/speech.js'
+import {
+  createListener,
+  createSpeaker,
+  selectProviders,
+  stopSpeaking,
+  stripMarkdown,
+} from '../lib/speech.js'
 import { Alert, Card } from './ui.jsx'
 
 function MicIcon() {
@@ -210,6 +216,10 @@ export default function AskAssistant({ hero = false, greeting = '', belowWelcome
   const [error, setError] = useState(null)
   // Which tier can listen here: 'server' (whisper.cpp), 'browser', or null.
   const [sttProvider, setSttProvider] = useState(null)
+  // Which tier can speak here, and whether the user wants answers read aloud.
+  // Off by default: an answer that starts talking unprompted is intrusive.
+  const [ttsProvider, setTtsProvider] = useState(null)
+  const [speakAnswers, setSpeakAnswers] = useState(false)
   // Whether chat is answered on this machine or by a hosted provider, so the
   // captions below state what is actually true for this deployment.
   const [isHosted, setIsHosted] = useState(false)
@@ -228,10 +238,18 @@ export default function AskAssistant({ hero = false, greeting = '', belowWelcome
   useEffect(() => {
     api
       .voiceStatus()
-      .then((v) => setSttProvider(selectProviders(v).stt))
+      .then((v) => {
+        const p = selectProviders(v)
+        setSttProvider(p.stt)
+        setTtsProvider(p.tts)
+      })
       // The probe failing does not mean speech is impossible — the browser may
       // still be able to listen, so fall back to whatever it supports.
-      .catch(() => setSttProvider(selectProviders(null).stt))
+      .catch(() => {
+        const p = selectProviders(null)
+        setSttProvider(p.stt)
+        setTtsProvider(p.tts)
+      })
     api
       .health()
       .then((h) => setIsHosted(h?.inference_mode === 'hosted'))
@@ -255,6 +273,7 @@ export default function AskAssistant({ hero = false, greeting = '', belowWelcome
 
   const closeChat = useCallback(() => {
     abortRef.current?.()
+    stopSpeaking()
     setMessages([])
     setAnswering(false)
     setError(null)
@@ -363,6 +382,17 @@ export default function AskAssistant({ hero = false, greeting = '', belowWelcome
           })
         } else if (event === 'done') {
           setAnswering(false)
+          if (speakAnswers) {
+            // Read the finished answer, not the streaming tokens: speaking each
+            // fragment as it lands produces stuttering, restarting speech.
+            setMessages((prev) => {
+              const last = prev[prev.length - 1]
+              if (last?.role === 'assistant' && last.text) {
+                createSpeaker(ttsProvider)(stripMarkdown(last.text))
+              }
+              return prev
+            })
+          }
         } else if (event === 'error') {
           setError({ message: data.message, hint: data.hint })
           setAnswering(false)
@@ -498,6 +528,27 @@ export default function AskAssistant({ hero = false, greeting = '', belowWelcome
             }
           }}
         />
+
+        {ttsProvider && (
+          <button
+            type="button"
+            onClick={() => {
+              // Turning it off should also silence whatever is mid-sentence.
+              if (speakAnswers) stopSpeaking()
+              setSpeakAnswers((on) => !on)
+            }}
+            title={speakAnswers ? 'Stop reading answers aloud' : 'Read answers aloud'}
+            aria-pressed={speakAnswers}
+            aria-label={speakAnswers ? 'Stop reading answers aloud' : 'Read answers aloud'}
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition ${
+              speakAnswers
+                ? 'bg-indigo-100 text-indigo-600'
+                : 'text-slate-400 hover:bg-slate-100 hover:text-slate-600'
+            }`}
+          >
+            {speakAnswers ? '🔊' : '🔈'}
+          </button>
+        )}
 
         {sttProvider && (
           <button
