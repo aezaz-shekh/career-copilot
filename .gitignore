@@ -28,7 +28,9 @@ dist/
 .vite/
 
 # --- Local model binaries (downloaded by setup, far too large for Git) ---
-models/
+# Anchored to the project root: an unanchored "models/" also matches
+# backend/app/models/, which is the SQLAlchemy ORM package and must be tracked.
+/models/
 *.gguf
 *.onnx
 
